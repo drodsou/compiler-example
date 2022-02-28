@@ -5,15 +5,18 @@ export function compiler(ast, lang) {
     if (!lang[n.name]) {
       throw new Error(`compiler: unknown language function '${n.name}'`);
     }
-    return lang[n.name](params(n.params));
+    // return lang[n.name](params(n.params));
+    return lang[n.name]((firstOnly)=>params(n.params, firstOnly));
   }
 
-  function params(parArr) {
+  function params(parArr,shallow=false) {
     let flatParArr = []
     parArr.forEach(p=>{
-      if (p.type === 'CallExpression') { flatParArr.push(call(p)) }
+      if (p.type === 'CallExpression') { 
+        if (shallow) { flatParArr.push( ()=>call(p) ); }
+        else { flatParArr.push( call(p) ); }
+      }
       else flatParArr.push(p)
-
     });
     return flatParArr;
   }
@@ -142,6 +145,7 @@ export function parser(tokens) {
       current++;
       return node;
     }
+    console.error('\nERROR: at compiler/parser', tokens[current], 'Maybe unmatched parentheses?\n');
     throw new TypeError(token.type);
   }
   let ast = {
