@@ -1,5 +1,5 @@
 
-// -- our language valid functions
+// -- our language definition
 const lang = {
   _init : function () {
     this._runtime = {};
@@ -8,7 +8,7 @@ const lang = {
   _STDOUT : true,
   _DEBUG : false,
   
-  // -- language commands
+  // -- language valid functions
 
   print : (argsFn)=>{
     let args = argsFn()
