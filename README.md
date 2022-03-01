@@ -1,6 +1,6 @@
 # compiler-example
 
-Basic compiler example
+Basic compiler and languaje example made in javascript (nodejs)
 
 Derived from [the-super-tiny-compiler](https://github.com/jamiebuilds/the-super-tiny-compiler/blob/master/the-super-tiny-compiler.js)
 
