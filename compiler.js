@@ -1,4 +1,4 @@
-export function compiler(ast, lang) {
+export function compiler(ast, lang, COMPILER_DEBUG=false) {
 
   // 
   function call(n) {
@@ -23,7 +23,8 @@ export function compiler(ast, lang) {
 
   // --start
   ast.body.forEach(n=>{
-    console.log('• result:', call(n))
+    let ret = call(n);
+    COMPILER_DEBUG && console.log('• compiler debug:', ret )
   })
   
 }
