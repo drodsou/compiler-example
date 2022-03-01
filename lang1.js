@@ -10,6 +10,9 @@ const lang = {
   
   // -- language valid functions
 
+  // -- (print () () ... )
+  // -- prints to stdout and to lang._print (as a test helper)
+  // -- if lang._STDOUT == false, no stdout, only lang._print
   print : (argsFn)=>{
     let args = argsFn()
       .map(a=>a.type === 'NumberLiteral' ? parseInt(a.value) : a.value);
@@ -21,19 +24,21 @@ const lang = {
     lang._STDOUT && console.log(argsStr); // print command
   },
 
+  /// -- sum  (add () () )
   add : (argsFn)=>{
     const args = argsFn()
     // semantic check
     lang._DEBUG && console.log('\nexecuting add', args);
+    // semantic check
     if (args.find(a=>a.type !== 'NumberLiteral')) {
       throw new Error('add: all parameters must be numbers');
     }
-
     // execute
     let calc = args.reduce( (p,c)=>p + parseInt(c.value),0)
     return {type: 'NumberLiteral', value: calc.toString()}
   },
 
+  // -- set variable (varset "var-name" () )
   varset : (argsFn)=>{
     const args = argsFn()
     lang._DEBUG && console.log('executing varset', args);
@@ -42,6 +47,7 @@ const lang = {
     return args[1]
   },
 
+  // -- get variable (varget "var-name")
   varget : (argsFn)=>{
     const args = argsFn()
     lang._DEBUG && console.log('executing varget', args);
@@ -49,7 +55,7 @@ const lang = {
     return lang._runtime[args[0].value]
   },
 
-  // -- equal to
+  // -- equal to  (eq () () )
   eq : (argsFn)=>{
     const args = argsFn()
     lang._DEBUG && console.log('executing eq', args);
@@ -57,7 +63,7 @@ const lang = {
     return {type: 'NumberLiteral', value: args[0].value === args[1].value ? "1" : "0" }
   },
 
-  // -- less than
+  // -- less than  (lt () () )
   lt : (argsFn)=>{
     const args = argsFn()
     lang._DEBUG && console.log('executing lt', args);
@@ -65,7 +71,7 @@ const lang = {
     return {type: 'NumberLiteral', value: parseInt(args[0].value)  < parseInt(args[1].value) ? "1" : "0" }
   },
 
-  // -- if
+  // -- (if (eq()) () () ... )
   if : (argsFn)=>{
     let [argsFn0, ...argsFnRest] = argsFn(true) // shallow
     
@@ -73,8 +79,8 @@ const lang = {
     const args0 = argsFn0()
     lang._DEBUG && console.log('executing if', args0);
     if (args0.value === "1") {
-      let ret=[]
-      argsFnRest.forEach(f=>ret.push( f() ));
+      let ret
+      argsFnRest.forEach(f=>ret = f() );
       return ret;
     } else {
       return {type: 'NoOp', value: ''}
@@ -82,35 +88,41 @@ const lang = {
 
   },
 
+  // -- (while (eq()) () () ... )
+  // -- returns last line inside while
   while : (argsFn)=>{
     let [argsFn0, ...argsFnRest] = argsFn(true) // shallow
     // todo: semantic check
     
     lang._DEBUG && console.log('\nentering while')
-    const ret = []
+    let ret 
     let whileTimes = 0;
     while (argsFn0().value === "1") {
       whileTimes++;
-      argsFnRest.forEach(f=>ret.push( f() ));
+      argsFnRest.forEach(f=>ret = f());
       lang._DEBUG && console.log('- executing while',whileTimes);
     } 
     return ret;
-
   },
     
+  // -- (fndef "fn-name" () () ... )
   fndef : (argsFn)=>{
-    let args = argsFn(true) // shallow
-    lang._DEBUG && console.log('executing fndef', args);
+    let [args0, ...argsFnRest] = argsFn(true) // shallow
+
+    lang._DEBUG && console.log('executing fndef');
     // todo: semantic check
-    lang._runtime[args[0].value] = args[1]
+    lang._runtime[args0.value] = argsFnRest
     return {}
   },
 
+  // -- (fnrun "fn-name")
   fnrun : (argsFn)=>{
-    let args = argsFn(true) // shallow
-    lang._DEBUG && console.log('executing fnrun', args);
+    let [args0] = argsFn() 
     // todo: semantic check
-    return lang._runtime[args[0].value]()
+    lang._DEBUG && console.log('executing fnrun', args0);
+    let ret;
+    lang._runtime[args0.value].forEach(f=>ret=f() );
+    return ret;
   },
 
 

@@ -84,13 +84,15 @@ test.while = {
 test.fn = {
   src: ` 
     (fndef "duplicate-v1"
+      (print "fnrun")
       (add (varget "v1") (varget "v1") )
     )
 
     (varset "v1" 5)
     (print (fnrun "duplicate-v1"))
+    (print (varget "v1"))
   `,
-   expected: `10`
+   expected: `fnrun,10,5`
 }
 
 // -- test script in our new language
